@@ -1,0 +1,322 @@
+
+
+# Change the server name to your server name.
+
+options:
+    servername: server
+
+# Gamemode switcher.
+
+function setGamemode(a: player, p: player, g: integer):
+    set {_gms::*} to "creative,0|survival,1|adventure,2|spectator,3" split at "|"
+    loop {_gms::*}:
+        set {_a::*} to loop-value split at ","
+        set {_a}'s gamemode to ({_a::1} parsed as gamemode) if ({_a::2} parsed as a number) = {_g}
+    send "&7Your gamemode has been set to &a%{_a}'s gamemode%&7." to {_a}
+    send "&7You set &a%{_a}%&7's gamemode to &a%{_a}'s gamemode%&7." to {_p}
+
+on command "gamemode creative":
+    execute player command "gmc"
+        
+on command "gamemode survival":
+    execute player command "gms"
+        
+on command "gamemode adventure":
+    execute player command "gma"
+        
+on command "gamemode spectator":
+    execute player command "gmsp"
+
+command gmc [<offline player=%player%>]:
+    permission: staff.gm
+    permission message: &cNo permission!
+    trigger:
+        setGamemode(arg-1, player, 0)
+        
+command gms [<offline player=%player%>]:
+    permission: staff.gm
+    permission message: &cNo permission!
+    trigger:            
+        setGamemode(arg-1, player, 1)
+
+command gma [<offline player=%player%>]:
+    permission: staff.gm
+    permission message: &cNo permission!
+    trigger:
+        setGamemode(arg-1, player, 2)
+
+command gmsp [<offline player=%player%>]:
+    permission: staff.gm
+    permission message: &cNo permission!
+    trigger:
+        setGamemode(arg-1, player, 3)
+
+# Basic commands.
+
+command tpall [<text>]:
+    permission: staff.teleport
+    permission message: &cNo permission!
+    trigger:
+        teleport all players where [input != player] to player
+        send "&7You have teleported all players to you!"
+
+command rename [<text="No Name Provided">]:
+    permission: staff.item
+    permission message: &cNo permission!
+    trigger:
+        send "&7You have renamed your tool to &e%colored arg-1%&7."
+        set name of player's tool to arg-1
+        
+command heal [<offline player=%player%>]:
+    permission: staff.heal
+    permission message: &cNo permission!
+    trigger:
+        add 10 to arg-1's health and arg-1's hunger
+        send "&7Successfully healed &a%arg-1%&7."
+        
+command bc <text>:
+    usage: &cCorrect Usage&8: &c/bc <text>
+    aliases: broadcast,broadc,bcast
+    permission: staff.chat
+    permission message: &CNo permission!
+    trigger:
+        broadcast "<nl?1>&7&m                            <nl?1><nl?1>&b&l&lBROADCAST &8&l/ &r%colored arg-1%<nl?1><nl?1>&7&m                            <nl?1>" split at "<nl?1>"
+
+command rain [<text>]:
+    aliases: wr
+    permission: staff.world
+    permission message: &cNo permission!
+    trigger:
+        set weather in the player's world to rain
+        send "&7You have made it rain!"
+        
+command sun [<text>]:
+    aliases: wclear,wc,sunny
+    permission: staff.world
+    permission message: &cNo permission!
+    trigger:
+        set weather in the player's world to clear
+        send "&7You have cleared the weather!"
+        
+command day [<text>]:
+    permission: staff.world
+    permission message: &cNo permission!
+    trigger:
+        set time to 7:30
+        send "&7You have set the time to day!"
+
+command night [<text>]:
+    permission: staff.world
+    permission message: &cNo permission!
+    trigger:
+        set time to 23:00
+        send "&7You have set the time to night!"
+
+command clearchat [<text>]:
+    permission: staff.cc
+    permission message: &cNo permission!
+    trigger:
+        broadcast "%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%"
+        broadcast "&7Chat has been cleared by &3&n%player%&7."
+
+# Fly commands.
+
+command fly [<offline player=%player%>]:
+    permission: staff.gm
+    permission message: &cNo permission!
+    trigger:
+    
+        send "&cThis player isn't online!" to player if arg-1 isn't online
+        arg-1 is online
+    
+        if arg-1's flight state is false:
+            set arg-1's flight state to true
+            send "&7You now have flight enabled!" to arg-1
+            send "&7You have enabled flight for %arg-1%&7!" to player
+                
+        else if arg-1's flight state is true:
+            set arg-1's flight state to false
+            send "&7You now have flight disabled." to arg-1
+            send "&7You have disabled flight for %arg-1%&7." to player
+            
+command flyspeed <number=2>:
+    permission: staff.fly
+    permission message: &cNo permission!
+    trigger:
+        set the player's fly speed to (arg 1 / 10)
+        send "&7Your flight speed has been set to &a%(player's fly speed * 10) - 1%&7."
+    
+# /back command.
+
+on death:
+    set (metadata "lastdeath" of victim) to (victim's location)
+            
+command back [<text>]:
+    permission: staff.back
+    permission message: &cNo permission!
+    trigger:
+        teleport player to (metadata "lastdeath" of player)
+        send "&7You were teleport to your last death!" to player
+
+# Kick & ban commands.
+    
+on connect:
+    {ban::%player's uuid%::*} is set
+    player is set
+
+    set {_line} to "&8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &f"
+    
+    difference between {ban::%player's uuid%::1} and now > {ban::%player's uuid%::3}:
+        delete {ban::%player's uuid%::*}
+        remove player from {banlist::*}
+        unban player
+
+        kick player due to "%{_line}%%nl%%nl%&2Please reconnect to be unbanned%nl%&2from the the Discord server and%nl%&2Minecraft server!%nl%%nl%%{_line}%"
+        stop
+
+    set {_time} to (difference between now and ({ban::%player's uuid%::3} after {ban::%player's uuid%::1}))
+    set {_time} to "FOREVER" if {ban::%player's uuid%::3} = 0
+    
+    kick player due to "%{_line}%%nl%%nl%%nl%&cYou were banned from &4{@servername}&c!%nl%&8(%{ban::%player's uuid%::1} formatted human-readable as "MM/dd/YY, h:mm a"% PST)%nl%%nl%&7Reason Provided&8:%nl%&f%{ban::%player's uuid%::2}%%nl%%nl%&7Ban Duration&8:%nl%&f%{_time}%%nl%%nl%%nl%%{_line}%"
+    
+command kick [<offlineplayer>] [<text="&8[No Reason Provided]">]:
+    trigger:
+        send "&cUsage&8: &c/kick <player> <reason>" if arg-1 isn't set
+        arg-1 is set
+        
+        send "&CThis player isn't online!" if arg-1 isn't online
+        arg-1 is online
+        
+        set {_line} to "&8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &f"
+        kick arg-1 due to "%{_line}%%nl%%nl%%nl%&cYou were kicked from &4{@servername}&c!%nl%&8(%now formatted human-readable as "MM/dd/YY, h:mm a"% PST)%nl%%nl%&7&nReason Provided&8:%nl%&f%arg-2%%nl%%nl%%nl%%{_line}%"
+        send "&7Kicked &c%arg-1%&7 with the reason&8: &c%arg-2%&7."
+
+command /ban <offlineplayer> <text="&8[No Reason Provided]"> [<timespan>]:
+    permission: staff.ban
+    permission message: &cNo permission!
+    usage: &cUsage&8: &c/ban <player> <reason> &8[&c<time>&8]
+    trigger:
+        send "&cThis player hasn't played before!" to player if arg-1 hasn't played before
+        arg-1 has played before
+    
+        send "&cThis player is already banned!" to player if arg-1 is banned
+        arg-1 isn't banned
+    
+        add now to {ban::%arg-1's uuid%::*}
+        add arg-2 to {ban::%arg-1's uuid%::*}
+        add arg-3 ? 0 to {ban::%arg-1's uuid%::*}
+    
+        add arg-1 to {banlist::*}
+        add {ban::%arg-1's uuid%::*} to {ph::%arg-1's uuid%::%size of {ph::%arg-1's uuid%::*}%::*}
+        
+        set {_line} to "&8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &8&m &f"
+        set {_time} to {ban::%arg-1's uuid%::3}
+        set {_time} to "FOREVER" if {ban::%arg-1's uuid%::3} = 0
+        
+        ban arg-1 due to "%{_line}%%nl%%nl%%nl%&cYou were banned from &4{@servername}&c!%nl%&8(%{ban::%arg-1's uuid%::1} formatted human-readable as "MM/dd/YY, h:mm a"% PST)%nl%%nl%&7Reason Provided&8:%nl%&f%{ban::%arg-1's uuid%::2}%%nl%%nl%&7Ban Duration&8:%nl%&f%{_time}%%nl%%nl%%nl%%{_line}%"
+        kick arg-1 due to "%{_line}%%nl%%nl%%nl%&cYou were banned from &4{@servername}&c!%nl%&8(%{ban::%arg-1's uuid%::1} formatted human-readable as "MM/dd/YY, h:mm a"% PST)%nl%%nl%&7Reason Provided&8:%nl%&f%{ban::%arg-1's uuid%::2}%%nl%%nl%&7Ban Duration&8:%nl%&f%{_time}%%nl%%nl%%nl%%{_line}%"
+        send "&7Banned &c%arg-1%&7 for &c%arg-3 ? "FOREVER"%&7 with the reason&8: &c%arg-2%&7." to player
+    
+command unban <offlineplayer>:
+    permission: staff.ban
+    permission message: &cNo permission!
+    usage: &cUsage&8: &c/unban <player>
+    trigger:
+    
+        difference between {ban::%arg-1's uuid%::1} and now > {ban::%arg-1's uuid%::3}:
+            delete {ban::%arg-1's uuid%::*}
+            remove arg-1 from {banlist::*}
+            unban arg-1
+    
+        send "&cThis player isn't banned!" to player if {ban::%arg-1's uuid%::*} isn't set
+        {ban::%arg-1's uuid%::*} is set
+
+        set {_time} to (difference between now and ({ban::%player's uuid%::3} after {ban::%player's uuid%::1}))
+        set {_time} to "FOREVER" if {ban::%arg-1's uuid%::3} = 0
+    
+        send "|&7You have successfully unbanned &c%arg-1%&7.||&7Reason Banned&8: &f%{ban::%arg-1's uuid%::2}%|&7Ban Duration&8: &f%{_time}%|&7Banned On&8: &f%{ban::%arg-1's uuid%::1} formatted human-readable as "MM/dd/YY, h:mm a"% PST|" split at "|"
+        
+        unban arg-1
+        delete {ban::%arg-1's uuid%::*}
+        remove arg-1 from {banlist::*}
+  
+on chat:
+    {mute::%player's uuid%::*} is set
+
+    difference between {mute::%player's uuid%::3} and now > {mute::%player's uuid%::2}:
+        delete {mute::%player's uuid%::*}
+        remove player from {mutelist::*}
+        stop
+
+    set {_time} to (difference between now and ({mute::%player's uuid%::2} after {mute::%player's uuid%::3}))
+    set {_time} to "FOREVER" if {mute::%player's uuid%::2} = 0
+    
+    send "|&cYou are muted from &4{@servername}&c!||&7Reason Muted&8: &f%{mute::%player's uuid%::1}%|&7Mute Duration&8: &f%{_time}%|&7Time Muted&8: &f%{mute::%player's uuid%::3} formatted human-readable as "MM/dd/YY, h:mm a"% PST|" split at "|"
+    cancel event
+  
+command /banlist [<text>]:
+    permission: staff.ban   
+    permission message: &cNo permission!
+    trigger:
+        send "&7The current ban list contains&8: &f%{banlist::*}%" to player
+  
+command /mutelist [<text>]:
+    permission: staff.mute   
+    permission message: &cNo permission!
+    trigger:
+        send "&7The current mute list contains&8: &f%{mutelist::*}%" to player
+  
+command /mute <offlineplayer> <text="&8[No Reason Provided]"> [<timespan>]:
+    permission: staff.mute
+    permission message: &cNo permission!
+    usage: &cUsage&8: &c/mute <player> <reason> &8[&c<time>&8]
+    trigger:
+
+        difference between {mute::%arg-1's uuid%::3} and now > {mute::%arg-1's uuid%::2}:
+            delete {mute::%arg-1's uuid%::*}
+            stop
+        
+        send "&cThis player hasn't played before!" to player if arg-1 hasn't played before
+        arg-1 has played before
+    
+        send "&cThis player is already muted!" to player if {mute::%arg-1's uuid%::*} is set
+        {mute::%arg-1's uuid%::*} isn't set
+    
+        add arg-1 to {mutelist::*}
+    
+        add arg-2 to {mute::%arg-1's uuid%::*}
+        add arg-3 ? 0 to {mute::%arg-1's uuid%::*}
+        add now to {mute::%arg-1's uuid%::*}
+        
+        set {_time} to {mute::%arg-1's uuid%::2}
+        set {_time} to "FOREVER" if {mute::%arg-1's uuid%::2} = 0
+        
+        add {mute::%arg-1's uuid%::*} to {ph::%arg-1's uuid%::%size of {ph::%arg-1's uuid%::*}%}
+        send "|&cYou are muted from &4{@servername}&c!||&7Reason Muted&8: &f%{mute::%player's uuid%::1}%|&7Mute Duration&8: &f%{_time}%|&7Time Muted&8: &f%{mute::%arg-1's uuid%::3} formatted human-readable as "MM/dd/YY, h:mm a"% PST|" split at "|" to arg-1
+        send "|&7You have successfully muted &c%arg-1%&7.||&7Reason Muted&8: &f%{mute::%arg-1's uuid%::1}%|&7Mute Duration&8: &f%{_time}%|&7Time Muted&8: &f%{mute::%arg-1's uuid%::3} formatted human-readable as "MM/dd/YY, h:mm a"% PST|" split at "|"
+        
+command /punishhistory <offlineplayer=%player%>:
+    permission: staff.punish
+    permission message: &cNo permission!
+    trigger:
+        send 1
+    
+command /unmute <offlineplayer>:
+    permission: staff.mute
+    permission message: &cNo permission!
+    usage: &cUsage&8: &c/unmute <player>
+    trigger:
+    
+        difference between {mute::%arg-1's uuid%::3} and now > {mute::%arg-1's uuid%::2}:
+            delete {mute::%arg-1's uuid%::*}
+    
+        send "&cThis player isn't muted!" to player if {mute::%arg-1's uuid%::*} isn't set
+        {mute::%arg-1's uuid%::*} is set
+
+        set {_time} to (difference between now and ({mute::%arg-1's uuid%::2} after {mute::%arg-1's uuid%::3}))
+        set {_time} to "FOREVER" if {mute::%arg-1's uuid%::2} = 0
+    
+        send "|&7You have successfully unmuted &c%arg-1%&7.||&7Reason Muted&8: &f%{mute::%arg-1's uuid%::1}%|&7Mute Duration&8: &f%{_time}%|&7Time Muted&8: &f%{mute::%arg-1's uuid%::3} formatted human-readable as "MM/dd/YY, h:mm a"% PST|" split at "|"
+        
+        delete {mute::%arg-1's uuid%::*}
+        remove arg-1 from {mutelist::*}
