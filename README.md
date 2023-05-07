@@ -9,7 +9,7 @@ just basic necessities.
 # Script Authors:
    - GDude_ (GDude_#0001)
    
-‎‎‎
+‎‎‎ 
 
 # Dependencies:
    - [Skript](https://github.com/SkriptLang/Skript/releases) (no shit)
